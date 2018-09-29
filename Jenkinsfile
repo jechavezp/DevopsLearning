@@ -1,21 +1,27 @@
 node {
 
-   stage('Preparation') { // for display purposes
+   stage('Clone repository') { // for display purposes
       // Get some code from a GitHub repository
-      git branch: 'feature/jenkinsfile', url: 'https://github.com/jechavezp/DevopsLearning'
+      git branch: 'develop', url: 'https://github.com/jechavezp/DevopsLearning'
    }
 
-//    stage('Build') {
-//       // Run the maven build
-//       if (isUnix()) {
-//          sh "'${mvnHome}/bin/mvn' -Dmaven.test.failure.ignore clean package"
-//       } else {
-//          bat(/"${mvnHome}\bin\mvn" -Dmaven.test.failure.ignore clean package/)
-//       }
-//    }
+   stage('Prepare files') {
+       sh 'chmod +x ./mvnw'
+   }
 
-//    stage('Results') {
-//       junit '**/target/surefire-reports/TEST-*.xml'
-//       archive 'target/*.jar'
-//    }
+   stage('Run tests and generate tests reports') {
+       sh './mvnw surefire-report:report'
+   }
+
+   stage('Build arctifact') {
+       sh './mvnw package'
+   }
+
+   stage('Archive artifacts') {
+       archiveArtifacts 'target/*.jar'
+   }
+
+    stage('Publish test reports') {
+      junit '**/target/surefire-reports/TEST-*.xml'
+   }
 }
